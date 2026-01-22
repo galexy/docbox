@@ -197,4 +197,215 @@ struct OCRProcessorTests {
         #expect(obs1 == obs2)
         #expect(obs1 != obs3)
     }
+
+    // MARK: - TextObservation corner points
+
+    @Test("TextObservation has corner points")
+    func textObservationCornerPoints() {
+        let observation = TextObservation(
+            text: "Test",
+            boundingBox: CGRect(x: 0.1, y: 0.2, width: 0.5, height: 0.1),
+            confidence: 0.95,
+            topLeft: CGPoint(x: 0.1, y: 0.3),
+            topRight: CGPoint(x: 0.6, y: 0.3),
+            bottomLeft: CGPoint(x: 0.1, y: 0.2),
+            bottomRight: CGPoint(x: 0.6, y: 0.2)
+        )
+
+        #expect(observation.topLeft == CGPoint(x: 0.1, y: 0.3))
+        #expect(observation.topRight == CGPoint(x: 0.6, y: 0.3))
+        #expect(observation.bottomLeft == CGPoint(x: 0.1, y: 0.2))
+        #expect(observation.bottomRight == CGPoint(x: 0.6, y: 0.2))
+    }
+}
+
+// MARK: - OrientationDetector Tests
+
+@Suite("OrientationDetector Tests")
+struct OrientationDetectorTests {
+
+    /// Create observation with specific text angle (in degrees)
+    private func createObservation(angle: CGFloat) -> TextObservation {
+        let radians = angle * .pi / 180
+        let length: CGFloat = 0.5
+
+        // Create corner points based on angle
+        let topLeft = CGPoint(x: 0.2, y: 0.5)
+        let topRight = CGPoint(
+            x: topLeft.x + length * cos(radians),
+            y: topLeft.y + length * sin(radians)
+        )
+        let bottomLeft = CGPoint(
+            x: topLeft.x - 0.05 * sin(radians),
+            y: topLeft.y + 0.05 * cos(radians)
+        )
+        let bottomRight = CGPoint(
+            x: topRight.x - 0.05 * sin(radians),
+            y: topRight.y + 0.05 * cos(radians)
+        )
+
+        return TextObservation(
+            text: "Test",
+            boundingBox: CGRect(x: 0.2, y: 0.45, width: 0.5, height: 0.1),
+            confidence: 0.95,
+            topLeft: topLeft,
+            topRight: topRight,
+            bottomLeft: bottomLeft,
+            bottomRight: bottomRight
+        )
+    }
+
+    @Test("detect upright orientation (0°)")
+    func detectUprightOrientation() {
+        let observations = [
+            createObservation(angle: 0),
+            createObservation(angle: 5),
+            createObservation(angle: -5)
+        ]
+
+        let orientation = OrientationDetector.detect(from: observations)
+        #expect(orientation == .up)
+    }
+
+    @Test("detect right rotation (90°)")
+    func detectRightRotation() {
+        let observations = [
+            createObservation(angle: 90),
+            createObservation(angle: 85),
+            createObservation(angle: 95)
+        ]
+
+        let orientation = OrientationDetector.detect(from: observations)
+        #expect(orientation == .right)
+    }
+
+    @Test("detect upside down (180°)")
+    func detectUpsideDown() {
+        let observations = [
+            createObservation(angle: 180),
+            createObservation(angle: 175),
+            createObservation(angle: -175)
+        ]
+
+        let orientation = OrientationDetector.detect(from: observations)
+        #expect(orientation == .down)
+    }
+
+    @Test("detect left rotation (270°)")
+    func detectLeftRotation() {
+        let observations = [
+            createObservation(angle: 270),
+            createObservation(angle: -90),
+            createObservation(angle: 265)
+        ]
+
+        let orientation = OrientationDetector.detect(from: observations)
+        #expect(orientation == .left)
+    }
+
+    @Test("empty observations defaults to up")
+    func emptyObservationsDefaultsToUp() {
+        let orientation = OrientationDetector.detect(from: [])
+        #expect(orientation == .up)
+    }
+
+    @Test("mixed angles uses majority")
+    func mixedAnglesUsesMajority() {
+        // 3 upright, 1 rotated
+        let observations = [
+            createObservation(angle: 0),
+            createObservation(angle: 5),
+            createObservation(angle: -5),
+            createObservation(angle: 90)
+        ]
+
+        let orientation = OrientationDetector.detect(from: observations)
+        #expect(orientation == .up)
+    }
+
+    @Test("correction degrees are correct")
+    func correctionDegreesCorrect() {
+        #expect(PageOrientation.up.correctionDegrees == 0)
+        #expect(PageOrientation.right.correctionDegrees == 270)
+        #expect(PageOrientation.down.correctionDegrees == 180)
+        #expect(PageOrientation.left.correctionDegrees == 90)
+    }
+}
+
+// MARK: - CGImage Rotation Tests
+
+@Suite("CGImage Rotation Tests")
+struct CGImageRotationTests {
+
+    /// Create a test image with specific dimensions
+    private func createTestImage(width: Int, height: Int) -> CGImage {
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)
+
+        guard let context = CGContext(
+            data: nil,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: width * 4,
+            space: colorSpace,
+            bitmapInfo: bitmapInfo.rawValue
+        ) else {
+            fatalError("Failed to create test image context")
+        }
+
+        // Fill with a color
+        context.setFillColor(CGColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0))
+        context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+
+        return context.makeImage()!
+    }
+
+    @Test("rotate 90° produces correct dimensions")
+    func rotate90ProducesCorrectDimensions() {
+        let image = createTestImage(width: 400, height: 100)
+        let rotated = image.rotated(by: 90)
+
+        #expect(rotated != nil)
+        #expect(rotated?.width == 100)
+        #expect(rotated?.height == 400)
+    }
+
+    @Test("rotate 180° preserves dimensions")
+    func rotate180PreservesDimensions() {
+        let image = createTestImage(width: 400, height: 100)
+        let rotated = image.rotated(by: 180)
+
+        #expect(rotated != nil)
+        #expect(rotated?.width == 400)
+        #expect(rotated?.height == 100)
+    }
+
+    @Test("rotate 270° produces correct dimensions")
+    func rotate270ProducesCorrectDimensions() {
+        let image = createTestImage(width: 400, height: 100)
+        let rotated = image.rotated(by: 270)
+
+        #expect(rotated != nil)
+        #expect(rotated?.width == 100)
+        #expect(rotated?.height == 400)
+    }
+
+    @Test("rotate 0° returns original")
+    func rotate0ReturnsOriginal() {
+        let image = createTestImage(width: 400, height: 100)
+        let rotated = image.rotated(by: 0)
+
+        #expect(rotated != nil)
+        #expect(rotated?.width == 400)
+        #expect(rotated?.height == 100)
+    }
+
+    @Test("invalid rotation returns nil")
+    func invalidRotationReturnsNil() {
+        let image = createTestImage(width: 400, height: 100)
+        let rotated = image.rotated(by: 45)
+
+        #expect(rotated == nil)
+    }
 }
