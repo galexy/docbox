@@ -69,10 +69,10 @@ public final class BandAssembler {
 
         let totalBytes = height * bytesPerRow
 
-        guard let dataProvider = CGDataProvider(dataInfo: nil,
-                                                 data: buffer,
-                                                 size: totalBytes,
-                                                 releaseData: { _, _, _ in }) else {
+        // Create a copy of the data so the CGImage owns it independently
+        // This is necessary because we reuse the buffer for subsequent pages
+        guard let dataCopy = CFDataCreate(nil, buffer.assumingMemoryBound(to: UInt8.self), totalBytes),
+              let dataProvider = CGDataProvider(data: dataCopy) else {
             return nil
         }
 
