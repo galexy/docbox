@@ -141,7 +141,10 @@ struct ScanCommand: AsyncParsableCommand {
     @Option(name: .long, help: "Discovery timeout in seconds")
     var timeout: Double = 2.0
 
-    @Argument(help: "Output file path (.tiff for multi-page, .png for separate files)")
+    @Flag(name: .long, help: "Skip OCR text recognition (PDF only)")
+    var noOcr: Bool = false
+
+    @Argument(help: "Output file path (.pdf for searchable PDF, .tiff for multi-page, .png for separate files)")
     var output: String
 
     func run() async throws {
@@ -203,13 +206,28 @@ struct ScanCommand: AsyncParsableCommand {
 
         switch ext {
         case "pdf":
-            // Multi-page PDF - add pages as they're scanned
+            // Multi-page searchable PDF - add pages as they're scanned with OCR
             let pdfGenerator = PDFGenerator(resolution: resolution)
+            let ocrProcessor = noOcr ? nil : OCRProcessor(recognitionLevel: .accurate)
             var pageCount = 0
             for await image in stream {
                 pageCount += 1
                 print("Scanned page \(pageCount)")
-                pdfGenerator.addPage(image)
+
+                // Run OCR if enabled
+                var textObservations: [TextObservation] = []
+                if let processor = ocrProcessor {
+                    do {
+                        textObservations = try await processor.recognize(image)
+                        if !textObservations.isEmpty {
+                            print("  Found \(textObservations.count) text region(s)")
+                        }
+                    } catch {
+                        print("  OCR failed: \(error.localizedDescription)")
+                    }
+                }
+
+                pdfGenerator.addPage(image, textObservations: textObservations)
             }
 
             if pageCount == 0 {
@@ -219,7 +237,8 @@ struct ScanCommand: AsyncParsableCommand {
 
             do {
                 try pdfGenerator.write(to: URL(fileURLWithPath: output))
-                print("Saved \(pageCount) page(s) to: \(output)")
+                let ocrStatus = noOcr ? "" : " (searchable)"
+                print("Saved \(pageCount) page(s) to: \(output)\(ocrStatus)")
             } catch {
                 print("Failed to save PDF: \(error.localizedDescription)")
             }

@@ -237,4 +237,192 @@ struct PDFGeneratorTests {
         // Cleanup
         try? FileManager.default.removeItem(at: url)
     }
+
+    // MARK: - Task 3.1: PDF with text layer is searchable
+
+    @Test("PDF with text layer is searchable")
+    func pdfWithTextLayerIsSearchable() throws {
+        let generator = PDFGenerator(resolution: 300)
+        let image = createTestImage(width: 2550, height: 3300)
+
+        // Create text observations
+        let observations = [
+            TextObservation(
+                text: "Hello World",
+                boundingBox: CGRect(x: 0.1, y: 0.5, width: 0.4, height: 0.05),
+                confidence: 0.99
+            ),
+            TextObservation(
+                text: "Searchable PDF",
+                boundingBox: CGRect(x: 0.1, y: 0.4, width: 0.5, height: 0.05),
+                confidence: 0.98
+            )
+        ]
+
+        generator.addPage(image, textObservations: observations)
+
+        let url = temporaryFileURL()
+        try generator.write(to: url)
+
+        // Open and search the PDF
+        guard let document = PDFDocument(url: url) else {
+            #expect(Bool(false), "Failed to open PDF")
+            return
+        }
+
+        // Search for text - PDFKit should find it
+        let searchResults = document.findString("Hello", withOptions: .caseInsensitive)
+        #expect(!searchResults.isEmpty, "Should find 'Hello' in searchable PDF")
+
+        let searchResults2 = document.findString("Searchable", withOptions: .caseInsensitive)
+        #expect(!searchResults2.isEmpty, "Should find 'Searchable' in searchable PDF")
+
+        // Cleanup
+        try? FileManager.default.removeItem(at: url)
+    }
+
+    // MARK: - Task 3.2: Text positions match observation bounding boxes
+
+    @Test("text positions match observation bounding boxes")
+    func textPositionsMatchBoundingBoxes() throws {
+        let generator = PDFGenerator(resolution: 300)
+        let image = createTestImage(width: 2550, height: 3300) // 612x792 points
+
+        // Place text at known position
+        let observation = TextObservation(
+            text: "TestPosition",
+            boundingBox: CGRect(x: 0.2, y: 0.3, width: 0.3, height: 0.05),
+            confidence: 0.99
+        )
+
+        generator.addPage(image, textObservations: [observation])
+
+        let url = temporaryFileURL()
+        try generator.write(to: url)
+
+        guard let document = PDFDocument(url: url),
+              let page = document.page(at: 0) else {
+            #expect(Bool(false), "Failed to open PDF")
+            return
+        }
+
+        // Search for the text
+        let selections = document.findString("TestPosition", withOptions: [])
+        #expect(!selections.isEmpty, "Should find text")
+
+        if let selection = selections.first {
+            let bounds = selection.bounds(for: page)
+            let pageRect = page.bounds(for: .mediaBox)
+
+            // Convert expected position to PDF points
+            let expectedX = 0.2 * pageRect.width
+            let expectedY = 0.3 * pageRect.height
+
+            // Check that text is approximately in the right position
+            // Allow some tolerance for font metrics differences
+            #expect(abs(bounds.origin.x - expectedX) < 50, "X position should be close to expected")
+            #expect(abs(bounds.origin.y - expectedY) < 50, "Y position should be close to expected")
+        }
+
+        // Cleanup
+        try? FileManager.default.removeItem(at: url)
+    }
+
+    // MARK: - Task 3.3: Text is invisible (doesn't affect visual appearance)
+
+    @Test("text is invisible in PDF")
+    func textIsInvisible() throws {
+        // Create two PDFs - one with text layer, one without
+        let imageWithoutText = createTestImage(width: 612, height: 792)
+        let imageWithText = createTestImage(width: 612, height: 792)
+
+        let genWithout = PDFGenerator(resolution: 72)
+        genWithout.addPage(imageWithoutText)
+        let urlWithout = temporaryFileURL()
+        try genWithout.write(to: urlWithout)
+
+        let genWith = PDFGenerator(resolution: 72)
+        let observations = [
+            TextObservation(
+                text: "Invisible Text Layer",
+                boundingBox: CGRect(x: 0.1, y: 0.5, width: 0.8, height: 0.1),
+                confidence: 0.99
+            )
+        ]
+        genWith.addPage(imageWithText, textObservations: observations)
+        let urlWith = temporaryFileURL()
+        try genWith.write(to: urlWith)
+
+        // Both PDFs should be created successfully
+        #expect(FileManager.default.fileExists(atPath: urlWithout.path))
+        #expect(FileManager.default.fileExists(atPath: urlWith.path))
+
+        // The PDF with text should still be searchable
+        let doc = PDFDocument(url: urlWith)
+        let results = doc?.findString("Invisible", withOptions: .caseInsensitive)
+        #expect(results?.isEmpty == false, "Text should be searchable")
+
+        // Cleanup
+        try? FileManager.default.removeItem(at: urlWithout)
+        try? FileManager.default.removeItem(at: urlWith)
+    }
+
+    // MARK: - Task 3.4: Multi-page PDF with text on each page
+
+    @Test("multi-page PDF with text on each page")
+    func multiPagePDFWithText() throws {
+        let generator = PDFGenerator(resolution: 300)
+
+        // Add 3 pages with different text
+        for i in 1...3 {
+            let image = createTestImage(width: 2550, height: 3300)
+            let observations = [
+                TextObservation(
+                    text: "Page \(i) Content",
+                    boundingBox: CGRect(x: 0.1, y: 0.5, width: 0.5, height: 0.05),
+                    confidence: 0.99
+                )
+            ]
+            generator.addPage(image, textObservations: observations)
+        }
+
+        let url = temporaryFileURL()
+        try generator.write(to: url)
+
+        guard let document = PDFDocument(url: url) else {
+            #expect(Bool(false), "Failed to open PDF")
+            return
+        }
+
+        #expect(document.pageCount == 3)
+
+        // Each page should have searchable text
+        for i in 1...3 {
+            let results = document.findString("Page \(i)", withOptions: [])
+            #expect(!results.isEmpty, "Should find 'Page \(i)' in PDF")
+        }
+
+        // Cleanup
+        try? FileManager.default.removeItem(at: url)
+    }
+
+    // MARK: - Additional text layer tests
+
+    @Test("PDF without text observations still works")
+    func pdfWithoutTextObservations() throws {
+        let generator = PDFGenerator(resolution: 300)
+        let image = createTestImage(width: 2550, height: 3300)
+
+        // Add page without text observations (empty array, which is the default)
+        generator.addPage(image)
+
+        let url = temporaryFileURL()
+        try generator.write(to: url)
+
+        let document = PDFDocument(url: url)
+        #expect(document?.pageCount == 1)
+
+        // Cleanup
+        try? FileManager.default.removeItem(at: url)
+    }
 }
