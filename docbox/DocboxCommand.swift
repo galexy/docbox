@@ -141,7 +141,10 @@ struct ScanCommand: AsyncParsableCommand {
     @Option(name: .long, help: "Discovery timeout in seconds")
     var timeout: Double = 2.0
 
-    @Argument(help: "Output file path (PNG format)")
+    @Flag(name: .long, help: "Output as multi-page TIFF (default: PNG)")
+    var tiff: Bool = false
+
+    @Argument(help: "Output file path")
     var output: String
 
     func run() async throws {
@@ -200,22 +203,40 @@ struct ScanCommand: AsyncParsableCommand {
         // Perform scan
         let stream = manager.scan(device: selectedScanner, config: config, timeout: 60.0)
 
+        var images: [CGImage] = []
         var pageCount = 0
         for await image in stream {
             pageCount += 1
-            let pagePath = generatePagePath(basePath: output, pageNumber: pageCount)
-            if saveImageAsPNG(image, to: pagePath) {
-                print("Saved page \(pageCount) to: \(pagePath)")
+            print("Scanned page \(pageCount)")
+            images.append(image)
+        }
+
+        if images.isEmpty {
+            print("No pages scanned.")
+            return
+        }
+
+        // Save images
+        if tiff {
+            // Multi-page TIFF
+            if saveImagesAsTIFF(images, to: output) {
+                print("Saved \(images.count) page(s) to: \(output)")
             } else {
-                print("Failed to save page \(pageCount)")
+                print("Failed to save TIFF")
+            }
+        } else {
+            // Multiple PNG files
+            for (index, image) in images.enumerated() {
+                let pagePath = generatePagePath(basePath: output, pageNumber: index + 1)
+                if saveImageAsPNG(image, to: pagePath) {
+                    print("Saved page \(index + 1) to: \(pagePath)")
+                } else {
+                    print("Failed to save page \(index + 1)")
+                }
             }
         }
 
-        if pageCount == 0 {
-            print("No pages scanned.")
-        } else {
-            print("Scan complete. \(pageCount) page(s) saved.")
-        }
+        print("Scan complete.")
     }
 
     /// Generate a page path, inserting page number before extension for multi-page scans
@@ -244,5 +265,23 @@ func saveImageAsPNG(_ image: CGImage, to path: String) -> Bool {
     }
 
     CGImageDestinationAddImage(destination, image, nil)
+    return CGImageDestinationFinalize(destination)
+}
+
+func saveImagesAsTIFF(_ images: [CGImage], to path: String) -> Bool {
+    guard !images.isEmpty else { return false }
+
+    let url = URL(fileURLWithPath: path)
+
+    // Create destination with capacity for all images
+    guard let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.tiff.identifier as CFString, images.count, nil) else {
+        return false
+    }
+
+    // Add each image as a page
+    for image in images {
+        CGImageDestinationAddImage(destination, image, nil)
+    }
+
     return CGImageDestinationFinalize(destination)
 }
