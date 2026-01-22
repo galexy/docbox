@@ -144,6 +144,9 @@ struct ScanCommand: AsyncParsableCommand {
     @Flag(name: .long, help: "Skip OCR text recognition (PDF only)")
     var noOcr: Bool = false
 
+    @Flag(name: .long, help: "Skip automatic orientation detection (PDF only)")
+    var noOrientation: Bool = false
+
     @Argument(help: "Output file path (.pdf for searchable PDF, .tiff for multi-page, .png for separate files)")
     var output: String
 
@@ -215,10 +218,33 @@ struct ScanCommand: AsyncParsableCommand {
                 print("Scanned page \(pageCount)")
 
                 // Run OCR if enabled
+                var finalImage = image
                 var textObservations: [TextObservation] = []
                 if let processor = ocrProcessor {
                     do {
-                        textObservations = try await processor.recognize(image)
+                        if noOrientation {
+                            // OCR without orientation correction
+                            textObservations = try await processor.recognize(image)
+                        } else {
+                            // OCR with automatic orientation detection and correction
+                            // First detect orientation from initial observations
+                            let initialObservations = try await processor.recognize(image)
+                            let orientation = OrientationDetector.detect(from: initialObservations)
+
+                            if orientation == .up {
+                                // Already upright, use initial results
+                                textObservations = initialObservations
+                            } else {
+                                // Rotate and re-run OCR
+                                print("  Correcting orientation: \(orientation.correctionDegrees)°")
+                                if let rotatedImage = image.rotated(by: orientation.correctionDegrees) {
+                                    finalImage = rotatedImage
+                                    textObservations = try await processor.recognize(rotatedImage)
+                                } else {
+                                    textObservations = initialObservations
+                                }
+                            }
+                        }
                         if !textObservations.isEmpty {
                             print("  Found \(textObservations.count) text region(s)")
                         }
@@ -227,7 +253,7 @@ struct ScanCommand: AsyncParsableCommand {
                     }
                 }
 
-                pdfGenerator.addPage(image, textObservations: textObservations)
+                pdfGenerator.addPage(finalImage, textObservations: textObservations)
             }
 
             if pageCount == 0 {
