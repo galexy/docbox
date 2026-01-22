@@ -4,29 +4,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-docbox is a macOS command-line tool written in Swift. The project is in early development stages.
+docbox is a macOS command-line tool that scans physical documents, performs OCR, and generates searchable PDF files. It uses ImageCaptureCore for scanner access, Vision for OCR, and PDFKit for PDF generation.
 
 ## Build Commands
 
+**Important:** Always specify `-scheme` when building. Building without a scheme fails because Swift Package Manager dependencies (ArgumentParser) aren't resolved to the local build directory.
+
 ```bash
-# Build with Xcode (Release)
-xcodebuild -project docbox.xcodeproj -scheme docbox -configuration Release build
+# Build the CLI (Debug)
+xcodebuild build -scheme docbox
 
-# Build with Xcode (Debug)
-xcodebuild -project docbox.xcodeproj -scheme docbox -configuration Debug build
+# Build the CLI (Release)
+xcodebuild build -scheme docbox -configuration Release
 
-# Run the built executable (after building)
-./build/Release/docbox
+# Build the framework
+xcodebuild build -scheme DocboxKit
+
+# Run tests
+xcodebuild test -scheme DocboxKit -destination 'platform=macOS'
+
+# Run the built executable
+./build/Debug/docbox list
+./build/Debug/docbox scan --help
 ```
 
 ## Project Structure
 
-- `docbox/` - Main source directory containing Swift source files
-- `docbox.xcodeproj/` - Xcode project configuration
+- `docbox/` - CLI application using Swift Argument Parser
+- `DocboxKit/` - Core framework with scanner management and image processing
+- `DocboxKitTests/` - Unit and integration tests
+- `stories/` - Development story documents with detailed design and tasks
+- `DESIGN.md` - Architecture and design documentation
 
 ## Technical Details
 
 - **Language:** Swift 6
 - **Platform:** macOS 14.0+
-- **Build System:** Xcode (no Swift Package Manager)
-- **Product Type:** Command-line tool
+- **Build System:** Xcode with Swift Package Manager
+- **Dependencies:** swift-argument-parser 1.7.0
+- **Product Type:** Command-line tool + Framework
+
+## Key Classes
+
+- `ScannerManager` - Handles scanner discovery and scanning operations
+- `BandAssembler` - Assembles scan bands into CGImage
+- `ScanConfiguration` - Value type for scan parameters

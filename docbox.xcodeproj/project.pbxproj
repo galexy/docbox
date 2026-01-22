@@ -6,6 +6,30 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		5989AF172F21754800F71654 /* DocboxKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5989AF0C2F21754800F71654 /* DocboxKit.framework */; };
+		5989AF7D2F217C4E00F71654 /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = 5989AF7C2F217C4E00F71654 /* ArgumentParser */; };
+		5989AFA82F217E3400F71654 /* DocboxKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5989AF0C2F21754800F71654 /* DocboxKit.framework */; };
+		5989AFA92F217E3400F71654 /* DocboxKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5989AF0C2F21754800F71654 /* DocboxKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5989AF182F21754800F71654 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 597BFC632F2166FB00E31AC2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5989AF0B2F21754800F71654;
+			remoteInfo = DocboxKit;
+		};
+		5989AFAA2F217E3400F71654 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 597BFC632F2166FB00E31AC2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5989AF0B2F21754800F71654;
+			remoteInfo = DocboxKit;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		597BFC692F2166FB00E31AC2 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -16,18 +40,42 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
+		5989AFAC2F217E3400F71654 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				5989AFA92F217E3400F71654 /* DocboxKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		597BFC6B2F2166FB00E31AC2 /* docbox */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = docbox; sourceTree = BUILT_PRODUCTS_DIR; };
 		597BFC7F2F21670000E31AC2 /* DESIGN.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DESIGN.md; sourceTree = "<group>"; };
 		597BFC802F21670000E31AC2 /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; };
+		5989AF0C2F21754800F71654 /* DocboxKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DocboxKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5989AF162F21754800F71654 /* DocboxKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DocboxKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5989AF282F2175DC00F71654 /* 20260121-124806-phase1-scanner-discovery.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "20260121-124806-phase1-scanner-discovery.md"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		597BFC6D2F2166FB00E31AC2 /* docbox */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = docbox;
+			sourceTree = "<group>";
+		};
+		5989AF0D2F21754800F71654 /* DocboxKit */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DocboxKit;
+			sourceTree = "<group>";
+		};
+		5989AF1A2F21754800F71654 /* DocboxKitTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DocboxKitTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -37,6 +85,23 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5989AFA82F217E3400F71654 /* DocboxKit.framework in Frameworks */,
+				5989AF7D2F217C4E00F71654 /* ArgumentParser in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5989AF092F21754800F71654 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5989AF132F21754800F71654 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5989AF172F21754800F71654 /* DocboxKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -46,9 +111,13 @@
 		597BFC622F2166FB00E31AC2 = {
 			isa = PBXGroup;
 			children = (
+				5989AF292F2175DC00F71654 /* stories */,
 				597BFC802F21670000E31AC2 /* CLAUDE.md */,
 				597BFC7F2F21670000E31AC2 /* DESIGN.md */,
 				597BFC6D2F2166FB00E31AC2 /* docbox */,
+				5989AF0D2F21754800F71654 /* DocboxKit */,
+				5989AF1A2F21754800F71654 /* DocboxKitTests */,
+				5989AFA72F217E3400F71654 /* Frameworks */,
 				597BFC6C2F2166FB00E31AC2 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -57,11 +126,38 @@
 			isa = PBXGroup;
 			children = (
 				597BFC6B2F2166FB00E31AC2 /* docbox */,
+				5989AF0C2F21754800F71654 /* DocboxKit.framework */,
+				5989AF162F21754800F71654 /* DocboxKitTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
+		5989AF292F2175DC00F71654 /* stories */ = {
+			isa = PBXGroup;
+			children = (
+				5989AF282F2175DC00F71654 /* 20260121-124806-phase1-scanner-discovery.md */,
+			);
+			path = stories;
+			sourceTree = "<group>";
+		};
+		5989AFA72F217E3400F71654 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		5989AF072F21754800F71654 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		597BFC6A2F2166FB00E31AC2 /* docbox */ = {
@@ -71,20 +167,69 @@
 				597BFC672F2166FB00E31AC2 /* Sources */,
 				597BFC682F2166FB00E31AC2 /* Frameworks */,
 				597BFC692F2166FB00E31AC2 /* CopyFiles */,
+				5989AFAC2F217E3400F71654 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				5989AFAB2F217E3400F71654 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				597BFC6D2F2166FB00E31AC2 /* docbox */,
 			);
 			name = docbox;
 			packageProductDependencies = (
+				5989AF7C2F217C4E00F71654 /* ArgumentParser */,
 			);
 			productName = docbox;
 			productReference = 597BFC6B2F2166FB00E31AC2 /* docbox */;
 			productType = "com.apple.product-type.tool";
+		};
+		5989AF0B2F21754800F71654 /* DocboxKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5989AF242F21754800F71654 /* Build configuration list for PBXNativeTarget "DocboxKit" */;
+			buildPhases = (
+				5989AF072F21754800F71654 /* Headers */,
+				5989AF082F21754800F71654 /* Sources */,
+				5989AF092F21754800F71654 /* Frameworks */,
+				5989AF0A2F21754800F71654 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5989AF0D2F21754800F71654 /* DocboxKit */,
+			);
+			name = DocboxKit;
+			packageProductDependencies = (
+			);
+			productName = DocboxKit;
+			productReference = 5989AF0C2F21754800F71654 /* DocboxKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		5989AF152F21754800F71654 /* DocboxKitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5989AF252F21754800F71654 /* Build configuration list for PBXNativeTarget "DocboxKitTests" */;
+			buildPhases = (
+				5989AF122F21754800F71654 /* Sources */,
+				5989AF132F21754800F71654 /* Frameworks */,
+				5989AF142F21754800F71654 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5989AF192F21754800F71654 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				5989AF1A2F21754800F71654 /* DocboxKitTests */,
+			);
+			name = DocboxKitTests;
+			packageProductDependencies = (
+			);
+			productName = DocboxKitTests;
+			productReference = 5989AF162F21754800F71654 /* DocboxKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -99,6 +244,12 @@
 					597BFC6A2F2166FB00E31AC2 = {
 						CreatedOnToolsVersion = 26.2;
 					};
+					5989AF0B2F21754800F71654 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					5989AF152F21754800F71654 = {
+						CreatedOnToolsVersion = 26.2;
+					};
 				};
 			};
 			buildConfigurationList = 597BFC662F2166FB00E31AC2 /* Build configuration list for PBXProject "docbox" */;
@@ -110,15 +261,37 @@
 			);
 			mainGroup = 597BFC622F2166FB00E31AC2;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				5989AF7B2F217C4E00F71654 /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 597BFC6C2F2166FB00E31AC2 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				597BFC6A2F2166FB00E31AC2 /* docbox */,
+				5989AF0B2F21754800F71654 /* DocboxKit */,
+				5989AF152F21754800F71654 /* DocboxKitTests */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		5989AF0A2F21754800F71654 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5989AF142F21754800F71654 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		597BFC672F2166FB00E31AC2 /* Sources */ = {
@@ -128,7 +301,34 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5989AF082F21754800F71654 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5989AF122F21754800F71654 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5989AF192F21754800F71654 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5989AF0B2F21754800F71654 /* DocboxKit */;
+			targetProxy = 5989AF182F21754800F71654 /* PBXContainerItemProxy */;
+		};
+		5989AFAB2F217E3400F71654 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5989AF0B2F21754800F71654 /* DocboxKit */;
+			targetProxy = 5989AFAA2F217E3400F71654 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		597BFC702F2166FC00E31AC2 /* Debug */ = {
@@ -253,6 +453,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
@@ -264,8 +468,120 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		5989AF1D2F21754800F71654 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = net.reasoning.DocboxKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		5989AF1E2F21754800F71654 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = net.reasoning.DocboxKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_MODULE = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		5989AF1F2F21754800F71654 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = net.reasoning.DocboxKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		5989AF202F21754800F71654 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = net.reasoning.DocboxKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -292,7 +608,44 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		5989AF242F21754800F71654 /* Build configuration list for PBXNativeTarget "DocboxKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5989AF1D2F21754800F71654 /* Debug */,
+				5989AF1E2F21754800F71654 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5989AF252F21754800F71654 /* Build configuration list for PBXNativeTarget "DocboxKitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5989AF1F2F21754800F71654 /* Debug */,
+				5989AF202F21754800F71654 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		5989AF7B2F217C4E00F71654 /* XCRemoteSwiftPackageReference "swift-argument-parser" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-argument-parser.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5989AF7C2F217C4E00F71654 /* ArgumentParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5989AF7B2F217C4E00F71654 /* XCRemoteSwiftPackageReference "swift-argument-parser" */;
+			productName = ArgumentParser;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 597BFC632F2166FB00E31AC2 /* Project object */;
 }

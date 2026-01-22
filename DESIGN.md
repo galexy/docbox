@@ -65,11 +65,17 @@ The browser operates asynchronously. After calling `start()`, device discovery h
 
 For a command-line tool, the practical approach is to start the browser, wait briefly for discovery (1-2 seconds typically suffices for local USB scanners), then either list available devices or proceed with a scan operation.
 
+**Important implementation detail:** The device browser must remain running throughout the scanning operation. Stopping the browser invalidates device handles, causing subsequent session open requests to fail with "Failed to open a connection to the device." The browser should only be stopped when the application exits or no longer needs scanner access.
+
 ### Scanner Sessions
 
 Scanners require exclusive access — only one application can control a scanner at a time. Before scanning, the application must request a session using `requestOpenSession()`. The request may fail if another application already holds the scanner. After scanning completes, the session should be closed to release the device.
 
 The session model means docbox cannot scan while another application (such as Image Capture or Preview) has the scanner open. The application should handle this gracefully with clear error messages.
+
+**Important implementation detail:** After `requestOpenSession()` succeeds, the application must wait for the `deviceDidBecomeReady(_:)` delegate callback before proceeding. The device's functional unit list is empty until this callback fires. Attempting to select a functional unit before the device is ready will fail or produce undefined behavior.
+
+When a session open fails because another client holds the scanner, the `scannerDeviceDidBecomeAvailable(_:)` delegate callback will fire when that client releases it. The application can then retry opening the session.
 
 ### Functional Units
 
