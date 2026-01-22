@@ -148,6 +148,8 @@ public final class ScannerManager {
 
     private var isWaitingForSession = false
     private var isWaitingForDeviceReady = false
+    private var lastBandEndRow: Int = 0
+    private var hasReceivedFirstBand = false
 
     // MARK: - Internal
 
@@ -244,7 +246,24 @@ public final class ScannerManager {
     }
 
     func handleBandData(_ data: any BandDataProtocol) {
+        // Detect page boundary: if dataStartRow goes back to a lower value,
+        // a new page has started. Yield the completed page first.
+        if hasReceivedFirstBand && data.dataStartRow < lastBandEndRow {
+            // New page detected - assemble and yield the previous page
+            if let image = bandAssembler?.assembleImage() {
+                if let singleCont = singlePageContinuation {
+                    // For single page mode, return first page and ignore rest
+                    singleCont.resume(returning: image)
+                    singlePageContinuation = nil
+                }
+                continuation?.yield(image)
+            }
+            bandAssembler?.reset()
+        }
+
         bandAssembler?.receiveBand(data)
+        lastBandEndRow = data.dataStartRow + data.dataNumRows
+        hasReceivedFirstBand = true
     }
 
     func handleScanComplete(device: any ScannerDeviceProtocol, error: Error?) {
@@ -272,11 +291,8 @@ public final class ScannerManager {
             }
         }
 
-        // Reset for potential next page (from document feeder)
+        // Scan complete - close session
         bandAssembler?.reset()
-
-        // For now, finish after one page
-        // TODO: Handle multi-page scanning from document feeder
         continuation?.finish()
         device.requestCloseSession()
     }
@@ -290,6 +306,8 @@ public final class ScannerManager {
         scanDelegate = nil
         isWaitingForSession = false
         isWaitingForDeviceReady = false
+        lastBandEndRow = 0
+        hasReceivedFirstBand = false
     }
 }
 

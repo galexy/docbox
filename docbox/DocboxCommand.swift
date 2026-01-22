@@ -197,18 +197,39 @@ struct ScanCommand: AsyncParsableCommand {
         print("Configuration: \(resolution) DPI, \(colorMode), \(pageSizeEnum), duplex: \(duplex)")
         print("Scanning...")
 
-        // Perform scan (single page for now)
-        do {
-            let image = try await manager.scanSinglePage(device: selectedScanner, config: config, timeout: 30.0)
+        // Perform scan
+        let stream = manager.scan(device: selectedScanner, config: config, timeout: 60.0)
 
-            if saveImageAsPNG(image, to: output) {
-                print("Saved page to: \(output)")
+        var pageCount = 0
+        for await image in stream {
+            pageCount += 1
+            let pagePath = generatePagePath(basePath: output, pageNumber: pageCount)
+            if saveImageAsPNG(image, to: pagePath) {
+                print("Saved page \(pageCount) to: \(pagePath)")
             } else {
-                print("Failed to save page")
+                print("Failed to save page \(pageCount)")
             }
-            print("Scan complete.")
-        } catch {
-            print("Scan failed: \(error.localizedDescription)")
+        }
+
+        if pageCount == 0 {
+            print("No pages scanned.")
+        } else {
+            print("Scan complete. \(pageCount) page(s) saved.")
+        }
+    }
+
+    /// Generate a page path, inserting page number before extension for multi-page scans
+    private func generatePagePath(basePath: String, pageNumber: Int) -> String {
+        let url = URL(fileURLWithPath: basePath)
+        let ext = url.pathExtension
+        let nameWithoutExt = url.deletingPathExtension().path
+
+        if pageNumber == 1 {
+            // First page uses the original filename
+            return basePath
+        } else {
+            // Subsequent pages get numbered: output.png -> output-2.png
+            return "\(nameWithoutExt)-\(pageNumber).\(ext)"
         }
     }
 }

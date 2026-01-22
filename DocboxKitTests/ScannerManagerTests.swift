@@ -224,6 +224,67 @@ struct ScannerManagerScanningTests {
         #expect(images.first?.height == 50)
     }
 
+    // MARK: - Task 6.2: Multi-page scan produces multiple CGImages
+
+    @Test("multi-page scan from document feeder produces multiple images")
+    func multiPageScanProducesMultipleImages() async {
+        let mockBrowser = MockDeviceBrowser()
+        let manager = ScannerManager(browser: mockBrowser)
+        let scanner = MockScannerDevice(name: "Test Scanner")
+
+        // Create test bands for two pages
+        // Page 1: 100x50 pixels
+        let page1Bands = [
+            createTestBand(width: 100, height: 50, startRow: 0, numRows: 25),
+            createTestBand(width: 100, height: 50, startRow: 25, numRows: 25)
+        ]
+        // Page 2: 100x50 pixels (startRow resets to 0 for new page)
+        let page2Bands = [
+            createTestBand(width: 100, height: 50, startRow: 0, numRows: 25),
+            createTestBand(width: 100, height: 50, startRow: 25, numRows: 25)
+        ]
+        // Deliver both pages' bands in sequence (simulating document feeder)
+        scanner.bandsToDeliver = [page1Bands + page2Bands]
+
+        let stream = manager.scan(device: scanner, config: ScanConfiguration())
+        var images: [CGImage] = []
+
+        for await image in stream {
+            images.append(image)
+        }
+
+        #expect(images.count == 2)
+        #expect(images[0].width == 100)
+        #expect(images[0].height == 50)
+        #expect(images[1].width == 100)
+        #expect(images[1].height == 50)
+    }
+
+    @Test("three-page scan produces three images")
+    func threePageScanProducesThreeImages() async {
+        let mockBrowser = MockDeviceBrowser()
+        let manager = ScannerManager(browser: mockBrowser)
+        let scanner = MockScannerDevice(name: "Test Scanner")
+
+        // Create bands for three pages
+        var allBands: [any BandDataProtocol] = []
+        for _ in 0..<3 {
+            // Each page has bands starting at row 0
+            allBands.append(createTestBand(width: 80, height: 40, startRow: 0, numRows: 20))
+            allBands.append(createTestBand(width: 80, height: 40, startRow: 20, numRows: 20))
+        }
+        scanner.bandsToDeliver = [allBands]
+
+        let stream = manager.scan(device: scanner, config: ScanConfiguration())
+        var images: [CGImage] = []
+
+        for await image in stream {
+            images.append(image)
+        }
+
+        #expect(images.count == 3)
+    }
+
     // MARK: - Task 6.3: Scan error propagates
 
     @Test("scan error completes stream")
