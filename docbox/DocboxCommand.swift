@@ -141,10 +141,7 @@ struct ScanCommand: AsyncParsableCommand {
     @Option(name: .long, help: "Discovery timeout in seconds")
     var timeout: Double = 2.0
 
-    @Flag(name: .long, help: "Output as multi-page TIFF (default: PNG)")
-    var tiff: Bool = false
-
-    @Argument(help: "Output file path")
+    @Argument(help: "Output file path (.tiff for multi-page, .png for separate files)")
     var output: String
 
     func run() async throws {
@@ -216,8 +213,9 @@ struct ScanCommand: AsyncParsableCommand {
             return
         }
 
-        // Save images
-        if tiff {
+        // Save images based on file extension
+        let ext = URL(fileURLWithPath: output).pathExtension.lowercased()
+        if ext == "tiff" || ext == "tif" {
             // Multi-page TIFF
             if saveImagesAsTIFF(images, to: output) {
                 print("Saved \(images.count) page(s) to: \(output)")
@@ -225,7 +223,7 @@ struct ScanCommand: AsyncParsableCommand {
                 print("Failed to save TIFF")
             }
         } else {
-            // Multiple PNG files
+            // Multiple PNG files (or other single-image formats)
             for (index, image) in images.enumerated() {
                 let pagePath = generatePagePath(basePath: output, pageNumber: index + 1)
                 if saveImageAsPNG(image, to: pagePath) {
