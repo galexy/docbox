@@ -197,40 +197,70 @@ struct ScanCommand: AsyncParsableCommand {
         print("Configuration: \(resolution) DPI, \(colorMode), \(pageSizeEnum), duplex: \(duplex)")
         print("Scanning...")
 
-        // Perform scan
+        // Perform scan - process pages as they arrive (overlapping scan with output)
         let stream = manager.scan(device: selectedScanner, config: config, timeout: 60.0)
-
-        var images: [CGImage] = []
-        var pageCount = 0
-        for await image in stream {
-            pageCount += 1
-            print("Scanned page \(pageCount)")
-            images.append(image)
-        }
-
-        if images.isEmpty {
-            print("No pages scanned.")
-            return
-        }
-
-        // Save images based on file extension
         let ext = URL(fileURLWithPath: output).pathExtension.lowercased()
-        if ext == "tiff" || ext == "tif" {
-            // Multi-page TIFF
+
+        switch ext {
+        case "pdf":
+            // Multi-page PDF - add pages as they're scanned
+            let pdfGenerator = PDFGenerator(resolution: resolution)
+            var pageCount = 0
+            for await image in stream {
+                pageCount += 1
+                print("Scanned page \(pageCount)")
+                pdfGenerator.addPage(image)
+            }
+
+            if pageCount == 0 {
+                print("No pages scanned.")
+                return
+            }
+
+            do {
+                try pdfGenerator.write(to: URL(fileURLWithPath: output))
+                print("Saved \(pageCount) page(s) to: \(output)")
+            } catch {
+                print("Failed to save PDF: \(error.localizedDescription)")
+            }
+
+        case "tiff", "tif":
+            // Multi-page TIFF - requires all images upfront
+            var images: [CGImage] = []
+            var pageCount = 0
+            for await image in stream {
+                pageCount += 1
+                print("Scanned page \(pageCount)")
+                images.append(image)
+            }
+
+            if images.isEmpty {
+                print("No pages scanned.")
+                return
+            }
+
             if saveImagesAsTIFF(images, to: output) {
                 print("Saved \(images.count) page(s) to: \(output)")
             } else {
                 print("Failed to save TIFF")
             }
-        } else {
-            // Multiple PNG files (or other single-image formats)
-            for (index, image) in images.enumerated() {
-                let pagePath = generatePagePath(basePath: output, pageNumber: index + 1)
+
+        default:
+            // Multiple PNG files - write each page as it's scanned
+            var pageCount = 0
+            for await image in stream {
+                pageCount += 1
+                let pagePath = generatePagePath(basePath: output, pageNumber: pageCount)
                 if saveImageAsPNG(image, to: pagePath) {
-                    print("Saved page \(index + 1) to: \(pagePath)")
+                    print("Saved page \(pageCount) to: \(pagePath)")
                 } else {
-                    print("Failed to save page \(index + 1)")
+                    print("Failed to save page \(pageCount)")
                 }
+            }
+
+            if pageCount == 0 {
+                print("No pages scanned.")
+                return
             }
         }
 
