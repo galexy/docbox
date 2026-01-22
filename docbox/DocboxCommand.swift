@@ -215,14 +215,29 @@ struct ScanCommand: AsyncParsableCommand {
 
         // Save images based on file extension
         let ext = URL(fileURLWithPath: output).pathExtension.lowercased()
-        if ext == "tiff" || ext == "tif" {
+        switch ext {
+        case "pdf":
+            // Multi-page PDF
+            let pdfGenerator = PDFGenerator(resolution: resolution)
+            for image in images {
+                pdfGenerator.addPage(image)
+            }
+            do {
+                try pdfGenerator.write(to: URL(fileURLWithPath: output))
+                print("Saved \(images.count) page(s) to: \(output)")
+            } catch {
+                print("Failed to save PDF: \(error.localizedDescription)")
+            }
+
+        case "tiff", "tif":
             // Multi-page TIFF
             if saveImagesAsTIFF(images, to: output) {
                 print("Saved \(images.count) page(s) to: \(output)")
             } else {
                 print("Failed to save TIFF")
             }
-        } else {
+
+        default:
             // Multiple PNG files (or other single-image formats)
             for (index, image) in images.enumerated() {
                 let pagePath = generatePagePath(basePath: output, pageNumber: index + 1)

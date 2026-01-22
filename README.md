@@ -30,14 +30,17 @@ xcodebuild test -scheme DocboxKit -destination 'platform=macOS'
 # List available scanners
 ./build/Debug/docbox list
 
-# Scan to multi-page TIFF (recommended for multi-page documents)
+# Scan to PDF (recommended)
+./build/Debug/docbox scan output.pdf
+
+# Scan to multi-page TIFF
 ./build/Debug/docbox scan output.tiff
 
 # Scan to PNG (separate files: output.png, output-2.png, ...)
 ./build/Debug/docbox scan output.png
 
 # Scan with options
-./build/Debug/docbox scan --resolution 300 --grayscale --page-size letter output.tiff
+./build/Debug/docbox scan --resolution 300 --grayscale --page-size letter output.pdf
 
 # See all options
 ./build/Debug/docbox scan --help

@@ -49,3 +49,24 @@ xcodebuild test -scheme DocboxKit -destination 'platform=macOS'
 - `ScannerManager` - Handles scanner discovery and scanning operations
 - `BandAssembler` - Assembles scan bands into CGImage
 - `ScanConfiguration` - Value type for scan parameters
+
+## Workflow
+
+When working on a story (or phase of the work). Remember to the following:
+
+0. If a github issue isn't provided, create one for the scope of work (story)
+   and create a new branch that will be used for the PR later.
+1. Review the design document for high-level design
+2. Write the detailed story design document and add to the stories folder.
+3. Add the tasks you will work on to the gh issue. These should include the 
+   unit tests and integration tests.
+4. Work through the implementation and verify along the way by building and
+   continuing to run tests.
+5. Before moving the next phase or story, tell me you are done, commit your work
+   thus far so that I can provide feedback and guide you if you things need to
+   be updated. If there are issues, make sure to note that in the github issue
+   as we work. As we fix each issue, add a commit once tests are passing and
+   the issue is fixed.
+6. When I'm satisified, created a PR. Make sure to include examples uses of
+   the app (command line options, etc) to exercise the change or if the app
+   has a UI, add screenshots and a walkthrough.
