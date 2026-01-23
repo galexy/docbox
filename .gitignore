@@ -1,0 +1,18 @@
+# Build directories
+build/
+DerivedData/
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.xcscmblueprint
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Distribution
+dist/
+*.zip

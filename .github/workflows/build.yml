@@ -1,0 +1,66 @@
+name: Build and Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Build docbox CLI
+        run: |
+          xcodebuild build \
+            -scheme docbox \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Prepare distribution
+        run: |
+          mkdir -p dist
+          cp build/Build/Products/Release/docbox dist/
+          cp scripts/install.sh dist/
+          chmod +x dist/docbox
+          chmod +x dist/install.sh
+
+      - name: Create zip archive
+        run: |
+          cd dist
+          zip -r ../docbox-macos.zip .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docbox-macos
+          path: docbox-macos.zip
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docbox-macos
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: docbox-macos.zip
+          generate_release_notes: true
