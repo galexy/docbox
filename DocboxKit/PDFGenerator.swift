@@ -1,6 +1,7 @@
 import Foundation
 import CoreGraphics
 import CoreText
+import PDFKit
 
 /// A page with its image and optional text observations
 private struct PageContent {
@@ -12,11 +13,15 @@ private struct PageContent {
 public final class PDFGenerator {
     private var pages: [PageContent] = []
     private let resolution: Int
+    private let compressImages: Bool
 
     /// Creates a PDFGenerator with the specified scan resolution
-    /// - Parameter resolution: The scan resolution in DPI (default: 300)
-    public init(resolution: Int = 300) {
+    /// - Parameters:
+    ///   - resolution: The scan resolution in DPI (default: 300)
+    ///   - compressImages: Whether to compress images as JPEG (default: true)
+    public init(resolution: Int = 300, compressImages: Bool = true) {
         self.resolution = resolution
+        self.compressImages = compressImages
     }
 
     /// Add a page to the PDF
@@ -40,6 +45,38 @@ public final class PDFGenerator {
             throw PDFGeneratorError.noPages
         }
 
+        if compressImages {
+            // Two-stage write: Core Graphics → PDFKit with JPEG compression
+            let tempURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString + ".pdf")
+
+            defer {
+                try? FileManager.default.removeItem(at: tempURL)
+            }
+
+            // Write uncompressed PDF to temp location
+            try writeWithCoreGraphics(to: tempURL)
+
+            // Load with PDFKit and re-save with JPEG compression
+            guard let document = PDFDocument(url: tempURL) else {
+                throw PDFGeneratorError.compressionFailed
+            }
+
+            let options: [PDFDocumentWriteOption: Any] = [
+                .saveImagesAsJPEGOption: true
+            ]
+
+            guard document.write(to: url, withOptions: options) else {
+                throw PDFGeneratorError.compressionFailed
+            }
+        } else {
+            // Direct write without compression
+            try writeWithCoreGraphics(to: url)
+        }
+    }
+
+    /// Write PDF using Core Graphics (internal implementation)
+    private func writeWithCoreGraphics(to url: URL) throws {
         // Create PDF context with nil mediaBox (we'll set per-page)
         guard let context = CGContext(url as CFURL, mediaBox: nil, nil) else {
             throw PDFGeneratorError.contextCreationFailed
@@ -159,6 +196,7 @@ public enum PDFGeneratorError: Error, LocalizedError {
     case noPages
     case contextCreationFailed
     case writeFailed
+    case compressionFailed
 
     public var errorDescription: String? {
         switch self {
@@ -168,6 +206,8 @@ public enum PDFGeneratorError: Error, LocalizedError {
             return "Failed to create PDF context"
         case .writeFailed:
             return "Failed to write PDF file"
+        case .compressionFailed:
+            return "Failed to compress PDF"
         }
     }
 }
