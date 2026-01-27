@@ -147,6 +147,9 @@ struct ScanCommand: AsyncParsableCommand {
     @Flag(name: .long, help: "Skip automatic orientation detection (PDF only)")
     var noOrientation: Bool = false
 
+    @Flag(name: .long, help: "Disable JPEG compression (larger files, lossless quality)")
+    var noCompress: Bool = false
+
     @Argument(help: "Output file path (.pdf for searchable PDF, .tiff for multi-page, .png for separate files)")
     var output: String
 
@@ -210,7 +213,7 @@ struct ScanCommand: AsyncParsableCommand {
         switch ext {
         case "pdf":
             // Multi-page searchable PDF - add pages as they're scanned with OCR
-            let pdfGenerator = PDFGenerator(resolution: resolution)
+            let pdfGenerator = PDFGenerator(resolution: resolution, compressImages: !noCompress)
             let ocrProcessor = noOcr ? nil : OCRProcessor(recognitionLevel: .accurate)
             var pageCount = 0
             for await image in stream {
