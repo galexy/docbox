@@ -87,6 +87,7 @@ public final class ScannerManager {
             self.currentScanner = device
             self.currentConfig = config
             self.isWaitingForSession = true
+            self.scanCompletedNormally = false
 
             // Set up scanner delegate and store to keep alive
             let delegate = ScanDelegate(manager: self)
@@ -120,6 +121,7 @@ public final class ScannerManager {
             self.currentScanner = device
             self.currentConfig = config
             self.isWaitingForSession = true
+            self.scanCompletedNormally = false
 
             // Set up scanner delegate and store to keep alive
             let delegate = ScanDelegate(manager: self)
@@ -139,9 +141,16 @@ public final class ScannerManager {
             }
 
             continuation.onTermination = { [weak self, weak device] _ in
-                device?.cancelScan()
+                guard let self = self else {
+                    device?.requestCloseSession()
+                    return
+                }
+                // Only cancel if scan didn't complete normally
+                if !self.scanCompletedNormally {
+                    device?.cancelScan()
+                }
                 device?.requestCloseSession()
-                self?.cleanup()
+                self.cleanup()
             }
         }
     }
@@ -150,6 +159,7 @@ public final class ScannerManager {
     private var isWaitingForDeviceReady = false
     private var lastBandEndRow: Int = 0
     private var hasReceivedFirstBand = false
+    private var scanCompletedNormally = false
 
     // MARK: - Internal
 
@@ -277,6 +287,9 @@ public final class ScannerManager {
             return
         }
 
+        // Mark scan as completed normally - prevents cancelScan() in onTermination
+        scanCompletedNormally = true
+
         // Assemble the final image
         if let image = bandAssembler?.assembleImage() {
             if let singleCont = singlePageContinuation {
@@ -291,10 +304,11 @@ public final class ScannerManager {
             }
         }
 
-        // Scan complete - close session
+        // Scan complete - finish stream (onTermination will close session)
         bandAssembler?.reset()
         continuation?.finish()
-        device.requestCloseSession()
+        // Note: requestCloseSession() is called by onTermination handler
+        // to avoid race condition with cleanup()
     }
 
     private func cleanup() {
@@ -308,6 +322,7 @@ public final class ScannerManager {
         isWaitingForDeviceReady = false
         lastBandEndRow = 0
         hasReceivedFirstBand = false
+        scanCompletedNormally = false
     }
 }
 
